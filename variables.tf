@@ -1,24 +1,29 @@
-variable "name" {
+variable "region_id" {
+  description = "Region to launch the NAT instance"
+  type = string
+}
+
+variable "nat_instance_name" {
   description = "A unique name for the NAT instance"
   type = string
 }
 
-variable "ami_id" {
+variable "nat_instance_ami_id" {
   description = "ID of the AMI to use"
   type = string
 }
 
-variable "security_group_ingress_cidr_ipv4" {
-  description = "Security group ingress (IPV4)"
+variable "nat_instance_security_group_ingress_cidr_ipv4" {
+  description = "Security group ingress (IPV4) for NAT instance"
   type = string
 }
 
-variable "ssh_key_name" {
+variable "nat_instance_ssh_key_name" {
   description = "Name of the SSH key for the NAT instance"
   type = string
 }
 
-variable "subnet_id" {
+variable "nat_public_subnet_id" {
   description = "ID of the subnet the instance will be created in"
   type = string
 }

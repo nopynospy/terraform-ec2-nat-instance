@@ -11,12 +11,12 @@ terraform {
 
 provider "aws" {
   profile = "default"
-  region = "us-east-2"
+  region = var.region_id
 }
 
 resource "aws_security_group" "security_group" {
-  name = "${var.name}_security_group"
-  description = "Security group for NAT instance ${var.name}"
+  name = "${var.nat_instance_name}_security_group"
+  description = "Security group for NAT instance ${var.nat_instance_name}"
   vpc_id = var.vpc_id
 
   ingress = [
@@ -25,7 +25,7 @@ resource "aws_security_group" "security_group" {
       from_port = 0
       to_port = 0
       protocol = "-1"
-      cidr_blocks = [var.security_group_ingress_cidr_ipv4]
+      cidr_blocks = [var.nat_instance_security_group_ingress_cidr_ipv4]
       ipv6_cidr_blocks = []
       prefix_list_ids = []
       security_groups = []
@@ -49,7 +49,7 @@ resource "aws_security_group" "security_group" {
 }
 
 resource "aws_instance" "nat_instance" {
-  ami = var.ami_id
+  ami = var.nat_instance_ami_id
   instance_type = var.nat_instance_type
   count = 1
   key_name = var.ssh_key_name
@@ -72,19 +72,19 @@ sudo /etc/network/if-pre-up.d/nat-setup
   EOT
 
   tags = {
-    Name = var.name
+    Name = var.nat_instance_name
     Role = "nat"
   }
 }
 
 # use this network interface for the private subnet route table route
 resource "aws_network_interface" "network_interface" {
-  subnet_id = var.subnet_id
+  subnet_id = var.nat_public_subnet_id
   source_dest_check = false
   security_groups = [aws_security_group.security_group.id]
 
   tags = {
-    Name = "${var.name}_network_interface"
+    Name = "${var.nat_instance_name}_network_interface"
   }
 }
 
