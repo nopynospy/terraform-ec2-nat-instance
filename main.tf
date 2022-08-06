@@ -50,7 +50,7 @@ resource "aws_security_group" "security_group" {
 
 resource "aws_instance" "nat_instance" {
   ami = var.ami_id
-  instance_type = "t3.nano"
+  instance_type = var.nat_instance_type
   count = 1
   key_name = var.ssh_key_name
   network_interface {

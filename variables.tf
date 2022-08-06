@@ -27,3 +27,9 @@ variable "vpc_id" {
   description = "ID of the VPC the NAT instance will be created in"
   type = string
 }
+
+ variable "nat_instance_type" {
+  type = string
+  description = "Instance type for NAT"
+  default = "t3.nano"
+ }
