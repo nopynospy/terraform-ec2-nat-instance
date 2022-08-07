@@ -17,3 +17,6 @@ For production, please use NAT Gateway.
     - public_subnet_id -> nat_public_subnet_id
 3. Features added
     - SSM for NAT instance (Better security, no need to open port 22 and rely on SSH key)
+4. Replace user_data for nat_instance
+    - Tested original code in US-East-1 region, but private instance could not ping google.com
+    - Now use [these two lines from this blog post](https://www.kabisa.nl/tech/cost-saving-with-nat-instances/#the-ec2-instance) instead

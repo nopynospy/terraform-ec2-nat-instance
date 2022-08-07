@@ -18,10 +18,10 @@ variable "nat_instance_security_group_ingress_cidr_ipv4" {
   type = string
 }
 
-variable "nat_instance_ssh_key_name" {
-  description = "Name of the SSH key for the NAT instance"
-  type = string
-}
+# variable "nat_instance_ssh_key_name" {
+#   description = "Name of the SSH key for the NAT instance"
+#   type = string
+# }
 
 variable "nat_public_subnet_id" {
   description = "ID of the subnet the instance will be created in"

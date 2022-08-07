@@ -62,15 +62,8 @@ resource "aws_instance" "nat_instance" {
   user_data = <<EOT
 #!/bin/bash
 sudo /usr/bin/apt update
-sudo /usr/bin/apt install ifupdown
-/bin/echo '#!/bin/bash
-if [[ $(sudo /usr/sbin/iptables -t nat -L) != *"MASQUERADE"* ]]; then
-  /bin/echo 1 > /proc/sys/net/ipv4/ip_forward
-  /usr/sbin/iptables -t nat -A POSTROUTING -s ${var.nat_instance_security_group_ingress_cidr_ipv4} -j MASQUERADE
-fi
-' | sudo /usr/bin/tee /etc/network/if-pre-up.d/nat-setup
-sudo chmod +x /etc/network/if-pre-up.d/nat-setup
-sudo /etc/network/if-pre-up.d/nat-setup 
+sysctl -w net.ipv4.ip_forward=1
+/sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
   EOT
 
   tags = {
