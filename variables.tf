@@ -38,3 +38,9 @@ variable "vpc_id" {
   description = "Instance type for NAT"
   default = "t3.nano"
  }
+
+ variable "private_route_table_ids" {
+  description = "List of ID of the route tables for the private subnets."
+  type        = list(string)
+  default     = []
+}

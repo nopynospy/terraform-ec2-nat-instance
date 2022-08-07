@@ -52,7 +52,9 @@ resource "aws_instance" "nat_instance" {
   ami = var.nat_instance_ami_id
   instance_type = var.nat_instance_type
   count = 1
-  key_name = var.ssh_key_name
+  # For better security, just use SSM
+  # key_name = var.nat_instance_ssh_key_name
+  iam_instance_profile   = aws_iam_instance_profile.nat_iam_instance_profile.name
   network_interface {
     network_interface_id = aws_network_interface.network_interface.id
     device_index = 0
@@ -64,7 +66,7 @@ sudo /usr/bin/apt install ifupdown
 /bin/echo '#!/bin/bash
 if [[ $(sudo /usr/sbin/iptables -t nat -L) != *"MASQUERADE"* ]]; then
   /bin/echo 1 > /proc/sys/net/ipv4/ip_forward
-  /usr/sbin/iptables -t nat -A POSTROUTING -s ${var.security_group_ingress_cidr_ipv4} -j MASQUERADE
+  /usr/sbin/iptables -t nat -A POSTROUTING -s ${var.nat_instance_security_group_ingress_cidr_ipv4} -j MASQUERADE
 fi
 ' | sudo /usr/bin/tee /etc/network/if-pre-up.d/nat-setup
 sudo chmod +x /etc/network/if-pre-up.d/nat-setup
@@ -91,4 +93,39 @@ resource "aws_network_interface" "network_interface" {
 resource "aws_eip" "nat_public_ip" {
   instance = aws_instance.nat_instance[0].id
   vpc      = true
+}
+
+resource "aws_route" "this" {
+  count                  = length(var.private_route_table_ids)
+  route_table_id         = var.private_route_table_ids[count.index]
+  destination_cidr_block = "0.0.0.0/0"
+  network_interface_id   = aws_network_interface.network_interface.id
+}
+
+
+# enable SSM access
+resource "aws_iam_instance_profile" "nat_iam_instance_profile" {
+  role = aws_iam_role.nat_iam_role.name
+}
+
+resource "aws_iam_role" "nat_iam_role" {
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "nat_ssm" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.nat_iam_role.name
 }
