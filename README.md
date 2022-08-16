@@ -8,9 +8,12 @@ For production, please use NAT Gateway.
 
 # V1 Design
 ![V1 Design](public_instance_v1.jpg)
+- Refer basic_example folder
 - T3 nano instance for NAT instance, because regardless of size, T3 gives network of 5 Gigabit anyways, so might as well use the smallest one for cost-saving
 - While there are other EC2 instance families with network Gigabit of more than 5, T3 is still most cost-effective. For example, an A1 medium, which has 10 Gigabit, is around 6 times more expensive than a T3 nano.
 - SSM for NAT instance (Better security, no need to open port 22 and rely on SSH key)
+- Amazon Linux 2 for AMI, because it already comes with SSM installed
+- Patch manager is for automatic security patches
 
 # Changes made
 1. Add more variables and reduce hard-coded values.

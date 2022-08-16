@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = ">= 2.7.0"
     }
   }
@@ -11,53 +11,37 @@ terraform {
 
 provider "aws" {
   profile = "default"
-  region = var.region_id
+  region  = var.region_id
 }
 
-resource "aws_security_group" "security_group" {
-  name = "${var.nat_instance_name}_security_group"
-  description = "Security group for NAT instance ${var.nat_instance_name}"
+module "nat_security_group" {
+  source = "./modules/nat_security_group"
+  nat_instance_name = var.nat_instance_name
+  nat_instance_security_group_ingress_cidr_ipv4 = var.nat_instance_security_group_ingress_cidr_ipv4
   vpc_id = var.vpc_id
-
-  ingress = [
-    {
-      description = "Ingress CIDR"
-      from_port = 0
-      to_port = 0
-      protocol = "-1"
-      cidr_blocks = [var.nat_instance_security_group_ingress_cidr_ipv4]
-      ipv6_cidr_blocks = []
-      prefix_list_ids = []
-      security_groups = []
-      self = true
-    }
-  ]
-
-  egress = [
-    {
-      description = "Default egress"
-      from_port        = 0
-      to_port          = 0
-      protocol         = "-1"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids = []
-      security_groups = []
-      self = true
-    }
-  ]
 }
 
-resource "aws_instance" "nat_instance" {
-  ami = var.nat_instance_ami_id
+module "aws_linux_2_data" {
+  source = "./modules/aws_linux_2_data"
+}
+
+module "aws_linux_2_patch" {
+  source = "./modules/aws_linux_2_patch"
+  patch_baseline_name = "aws_linux_2_patch_baseline"
+  patch_group_name = "aws_linux_2_patch_group_name"
+}
+
+resource "aws_instance" "this" {
   instance_type = var.nat_instance_type
-  count = 1
+  count         = 1
+  monitoring    = true
+  ami = module.aws_linux_2_data.aws_linux_2_id
   # For better security, just use SSM
   # key_name = var.nat_instance_ssh_key_name
-  iam_instance_profile   = aws_iam_instance_profile.nat_iam_instance_profile.name
+  iam_instance_profile = module.ssm_iam.ssm_iam_profile_name
   network_interface {
-    network_interface_id = aws_network_interface.network_interface.id
-    device_index = 0
+    network_interface_id = aws_network_interface.this.id
+    device_index         = 0
   }
   user_data = <<EOT
 #!/bin/bash
@@ -69,22 +53,23 @@ sysctl -w net.ipv4.ip_forward=1
   tags = {
     Name = var.nat_instance_name
     Role = "nat"
+    "Patch Group" = module.aws_linux_2_patch.patch_group_id
   }
 }
 
 # use this network interface for the private subnet route table route
-resource "aws_network_interface" "network_interface" {
-  subnet_id = var.nat_public_subnet_id
+resource "aws_network_interface" "this" {
+  subnet_id         = var.nat_public_subnet_id
   source_dest_check = false
-  security_groups = [aws_security_group.security_group.id]
+  security_groups   = [module.nat_security_group.nat_sg_id]
 
   tags = {
     Name = "${var.nat_instance_name}_network_interface"
   }
 }
 
-resource "aws_eip" "nat_public_ip" {
-  instance = aws_instance.nat_instance[0].id
+resource "aws_eip" "this" {
+  instance = aws_instance.this[0].id
   vpc      = true
 }
 
@@ -92,33 +77,9 @@ resource "aws_route" "this" {
   count                  = length(var.private_route_table_ids)
   route_table_id         = var.private_route_table_ids[count.index]
   destination_cidr_block = "0.0.0.0/0"
-  network_interface_id   = aws_network_interface.network_interface.id
+  network_interface_id   = aws_network_interface.this.id
 }
 
-
-# enable SSM access
-resource "aws_iam_instance_profile" "nat_iam_instance_profile" {
-  role = aws_iam_role.nat_iam_role.name
-}
-
-resource "aws_iam_role" "nat_iam_role" {
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy_attachment" "nat_ssm" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  role       = aws_iam_role.nat_iam_role.name
+module "ssm_iam" {
+  source = "./modules/ssm_iam_attachment"
 }

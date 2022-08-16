@@ -1,13 +1,19 @@
-# output "network_interface_id" {
-#   description = "ID of the NAT instance's network interface"
-#   value = aws_network_interface.network_interface.id
-# }
-
-# output "instance_id" {
-#   description = "ID of the instance"
-#   value = aws_instance.nat_instance[0].id
-# }
-
 output "nat_sg_id" {
-  value = aws_security_group.security_group.id
+  description = "Security group ID for NAT instance"
+  value = module.nat_security_group.nat_sg_id
+}
+
+output "ssm_iam_profile_name" {
+  description = "IAM SSM instance profile name (for reusing to add SSM to other instances)"
+  value = module.ssm_iam.ssm_iam_profile_name
+}
+
+output "patch_group_id" {
+    description = "EC2 patch group ID, to be used in EC2 tag key, 'Patch Group'"
+    value = module.aws_linux_2_patch.patch_group_id
+}
+
+output "nat_instance_id" {
+  description = "ID for NAT instance"
+  value = aws_instance.this[0].id
 }
