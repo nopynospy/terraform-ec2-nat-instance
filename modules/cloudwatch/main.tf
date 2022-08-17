@@ -17,12 +17,18 @@ resource "aws_cloudwatch_dashboard" "main" {
             "NetworkIn",
             "InstanceId",
             "${var.nat_instance_id}"
+          ],
+          [
+            "AWS/EC2",
+            "NetworkOut",
+            "InstanceId",
+            "${var.nat_instance_id}"
           ]
         ],
         "period": 300,
         "stat": "Average",
         "region": "${var.region_id}",
-        "title": "NetworkIn"
+        "title": "NetworkIn/Out"
       }
     },
  {
@@ -35,46 +41,10 @@ resource "aws_cloudwatch_dashboard" "main" {
         "metrics": [
           [
             "AWS/EC2",
-            "NetworkOut",
-            "InstanceId",
-            "${var.nat_instance_id}"
-          ]
-        ],
-        "period": 300,
-        "stat": "Average",
-        "region": "${var.region_id}",
-        "title": "NetworkOut"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 6,
-      "width": 12,
-      "height": 6,
-      "properties": {
-        "metrics": [
-          [
-            "AWS/EC2",
             "NetworkPacketsIn",
             "InstanceId",
             "${var.nat_instance_id}"
-          ]
-        ],
-        "period": 300,
-        "stat": "Average",
-        "region": "${var.region_id}",
-        "title": "NetworkPacketsIn"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 12,
-      "y": 6,
-      "width": 12,
-      "height": 6,
-      "properties": {
-        "metrics": [
+          ],
           [
             "AWS/EC2",
             "NetworkPacketsOut",
@@ -85,13 +55,13 @@ resource "aws_cloudwatch_dashboard" "main" {
         "period": 300,
         "stat": "Average",
         "region": "${var.region_id}",
-        "title": "NetworkPacketsOut"
+        "title": "NetworkPacketsIn/Out"
       }
     },
     {
       "type": "metric",
       "x": 0,
-      "y": 12,
+      "y": 6,
       "width": 12,
       "height": 6,
       "properties": {
