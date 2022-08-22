@@ -3,5 +3,5 @@ variable "patch_baseline_name" {
 }
 
 variable "patch_group_name" {
-    description = "EC2 patch group name"
+  description = "EC2 patch group name"
 }

@@ -6,4 +6,3 @@
 basic_example/variables.tf
 experimental/variables.tf
 *package
-experimental

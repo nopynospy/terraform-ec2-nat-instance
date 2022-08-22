@@ -15,10 +15,10 @@ provider "aws" {
 }
 
 module "nat_security_group" {
-  source = "./modules/nat_security_group"
-  nat_instance_name = var.nat_instance_name
+  source                                        = "./modules/nat_security_group"
+  nat_instance_name                             = var.nat_instance_name
   nat_instance_security_group_ingress_cidr_ipv4 = var.nat_instance_security_group_ingress_cidr_ipv4
-  vpc_id = var.vpc_id
+  vpc_id                                        = var.vpc_id
 }
 
 module "aws_linux_2_data" {
@@ -26,16 +26,16 @@ module "aws_linux_2_data" {
 }
 
 module "aws_linux_2_patch" {
-  source = "./modules/aws_linux_2_patch"
+  source              = "./modules/aws_linux_2_patch"
   patch_baseline_name = "aws_linux_2_patch_baseline"
-  patch_group_name = "aws_linux_2_patch_group_name"
+  patch_group_name    = "aws_linux_2_patch_group_name"
 }
 
 resource "aws_instance" "this" {
   instance_type = var.nat_instance_type
   count         = 1
   monitoring    = true
-  ami = module.aws_linux_2_data.aws_linux_2_id
+  ami           = module.aws_linux_2_data.aws_linux_2_id
   # For better security, just use SSM
   # key_name = var.nat_instance_ssh_key_name
   iam_instance_profile = module.ssm_iam.ssm_iam_profile_name
@@ -51,8 +51,8 @@ sysctl -w net.ipv4.ip_forward=1
   EOT
 
   tags = {
-    Name = var.nat_instance_name
-    Role = "nat"
+    Name          = var.nat_instance_name
+    Role          = "nat"
     "Patch Group" = module.aws_linux_2_patch.patch_group_id
   }
 }
