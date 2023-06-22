@@ -1,0 +1,14 @@
+name: Validate terraform
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tf_validate:
+    name: Deploy Site
+    runs-on: ubuntu-latest
+    steps:
+    - name: Terraform Validate
+      uses: hashicorp/terraform-github-actions/validate@v0.3.7
