@@ -7,7 +7,7 @@ on:
 
 jobs:
   tf_validate:
-    name: Deploy Site
+    name: Validate terraform
     runs-on: ubuntu-latest
     steps:
     - name: Terraform Validate
