@@ -23,6 +23,7 @@ module "nat" {
   nat_public_subnet_id                          = module.vpc.public_subnets[0]
   vpc_id                                        = module.vpc.vpc_id
   private_route_table_ids                       = module.vpc.private_route_table_ids
+  ssm_iam_profile_name                          = module.ssm_iam.ssm_iam_profile_name
 }
 
 module "private_security_group" {
@@ -42,7 +43,7 @@ resource "aws_instance" "private" {
   ami                  = module.aws_linux_2_data.aws_linux_2_id
   instance_type        = "t3.nano"
   subnet_id            = module.vpc.private_subnets[0]
-  iam_instance_profile = module.nat.ssm_iam_profile_name
+  iam_instance_profile = module.ssm_iam.ssm_iam_profile_name
 
   vpc_security_group_ids = [module.private_security_group.private_sg_id]
   tags = {
@@ -57,4 +58,8 @@ module "cloudwatch" {
   dashboard_name  = "NAT-instance-dashboard"
   nat_instance_id = module.nat.nat_instance_id
   region_id       = var.region_id
+}
+
+module "ssm_iam" {
+  source = "github.com/nopynospy/terraform_ssm_iam_attachment"
 }

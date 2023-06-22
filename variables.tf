@@ -39,3 +39,9 @@ variable "private_route_table_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "ssm_iam_profile_name" {
+  description = "IAM profile for SSM"
+  type        = string
+  default     = null
+}

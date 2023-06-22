@@ -104,24 +104,24 @@ resource "aws_autoscaling_notification" "this" {
 }
 
 module "scale_alarm_policy_up" {
-  source = "../scale_alarm_policy"
-  alarm_description = "One of the metrics has exceed 90%"
-  asg_group_name = aws_autoscaling_group.this.name
-  asg_policy_name = "nat-scale-up-policy"
-  asg_adjustment = 1
-  threshold = 90
-  expression = "m1>=90||m2>=90||m3>=90||m4>=90||m5>=90"
+  source              = "../scale_alarm_policy"
+  alarm_description   = "One of the metrics has exceed 90%"
+  asg_group_name      = aws_autoscaling_group.this.name
+  asg_policy_name     = "nat-scale-up-policy"
+  asg_adjustment      = 1
+  threshold           = 90
+  expression          = "m1>=90||m2>=90||m3>=90||m4>=90||m5>=90"
   comparison_operator = "GreaterThanOrEqualToThreshold"
 }
 
 module "scale_alarm_policy_down" {
-  source = "../scale_alarm_policy"
-  alarm_description = "All of the metrics are below 60%"
-  asg_group_name = aws_autoscaling_group.this.name
-  asg_policy_name = "nat-scale-down-policy"
-  asg_adjustment = -1
-  threshold = 60
-  expression = "m1<=60&&m2<=60&&m3<=60&&m4<=60&&m5<=60"
+  source              = "../scale_alarm_policy"
+  alarm_description   = "All of the metrics are below 60%"
+  asg_group_name      = aws_autoscaling_group.this.name
+  asg_policy_name     = "nat-scale-down-policy"
+  asg_adjustment      = -1
+  threshold           = 60
+  expression          = "m1<=60&&m2<=60&&m3<=60&&m4<=60&&m5<=60"
   comparison_operator = "LessThanOrEqualToThreshold"
 }
 

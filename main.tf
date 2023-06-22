@@ -38,7 +38,7 @@ resource "aws_instance" "this" {
   ami           = module.aws_linux_2_data.aws_linux_2_id
   # For better security, just use SSM
   # key_name = var.nat_instance_ssh_key_name
-  iam_instance_profile = module.ssm_iam.ssm_iam_profile_name
+  iam_instance_profile = var.ssm_iam_profile_name
   network_interface {
     network_interface_id = aws_network_interface.this.id
     device_index         = 0
@@ -78,8 +78,4 @@ resource "aws_route" "this" {
   route_table_id         = var.private_route_table_ids[count.index]
   destination_cidr_block = "0.0.0.0/0"
   network_interface_id   = aws_network_interface.this.id
-}
-
-module "ssm_iam" {
-  source = "./modules/ssm_iam_attachment"
 }

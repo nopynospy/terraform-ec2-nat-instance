@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source               = "terraform-aws-modules/vpc/aws"
   name                 = "NAT instance dev VPC"
   cidr                 = var.vpc_cidr
   azs                  = ["${var.region_id}a"]
